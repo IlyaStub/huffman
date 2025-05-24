@@ -23,7 +23,7 @@ typedef struct BinaryReader
     float (*progress)(struct BinaryReader *self);
 } file_reader;
 
-file_reader *new_file_reader(const char *filename, size_t buffer_size);
-void free_file_reader(file_reader *self);
+file_reader *newFileReader(const char *filename, size_t buffer_size);
+void freeFileReader(file_reader *self);
 
 #endif

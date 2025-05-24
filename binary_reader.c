@@ -49,7 +49,7 @@ static float progress(file_reader *self)
     return (float)ftell(self->file) / self->file_size; // ftell - возвращает текущее значение указателя положения в файле для указанного потока
 }
 
-file_reader *new_file_reader(const char *file_name, size_t buffer_size)
+file_reader *newFileReader(const char *file_name, size_t buffer_size)
 {
     file_reader *self = calloc(1, sizeof(file_reader));
     if (self == NULL)
@@ -89,7 +89,7 @@ file_reader *new_file_reader(const char *file_name, size_t buffer_size)
     return self;
 }
 
-void free_file_reader(file_reader *self)
+void freeFileReader(file_reader *self)
 {
     if (self == NULL)
     {

@@ -43,7 +43,7 @@ static void reset(file_writer *self)
         self->buffer_pos = 0;
     }
 }
-file_writer* new_file_writer(const char *filename, size_t buffer_size)
+file_writer* newFileWriter(const char *filename, size_t buffer_size)
 {
     file_writer *self = calloc(1, sizeof(file_writer));
     if (self == NULL) {
@@ -75,7 +75,7 @@ file_writer* new_file_writer(const char *filename, size_t buffer_size)
     return self;
 }
 
-void free_file_writer(file_writer *self)
+void freeFileWriter(file_writer *self)
 {
     if (self == NULL) return;
 

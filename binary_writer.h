@@ -20,7 +20,7 @@ typedef struct BinaryWriter
     void (*reset)(struct BinaryWriter *self);
 } file_writer;
 
-file_writer *new_file_writer(const char *filename, size_t buffer_size);
-void free_file_writer(file_writer *self);
+file_writer *newFileWriter(const char *filename, size_t buffer_size);
+void freeFileWriter(file_writer *self);
 
 #endif
