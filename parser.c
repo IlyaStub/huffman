@@ -102,24 +102,27 @@ int parseArgs(Parser *parser)
         }
 
         for (int i = 0; i < parser->file_count; i++)
+    {
+        const char *filepath = parser->argv[3 + i];
+
+        struct stat st;
+        if (stat(filepath, &st) != 0)
         {
-            const char *filename = parser->argv[3 + i];
-
-            if (strlen(filename) > 255)
-            {
-                fprintf(stderr, "Error: The length of file %s name is too long. 255 - max. To name more, you need to drop 300 rubles at 89134848577 on t-bank\n", filename);
-                return 0;
-            }
-
-            struct stat st;
-            if (stat(filename, &st) != 0)
-            {
-                fprintf(stderr, "Error: The file %s does not exist\n", filename);
-                return 0;
-            }
-
-            parser->input_files[i] = filename;
+            fprintf(stderr, "Error: The file %s does not exist\n", filepath);
+            return 0;
         }
+
+        const char *basename = strrchr(filepath, '/');
+        basename = basename ? basename + 1 : filepath;
+
+        if (strlen(basename) > 255)
+        {
+            fprintf(stderr, "Error: The filename '%s' is too long (max 255 chars).\n", basename);
+            return 0;
+        }
+
+        parser->input_files[i] = filepath;
+    }
     }
     else if (parser->mode == DECOMPRESS)
     {
@@ -148,9 +151,9 @@ int parseArgs(Parser *parser)
 void printHelp()
 {
     printf("Usage:\n");
-    printf("   huffman -c archive_name file1 [file2...]    Compress files into archive\n");
-    printf("   huffman -d archive_name                     Decompress archive\n");
-    printf("   huffman -h                                  Show this help\n");
+    printf("   ./huffman -c archive_name file1 [file2...]    Compress files into archive\n");
+    printf("   ./huffman -d archive_name                     Decompress archive\n");
+    printf("   ./huffman -h                                  Show this help\n");
     printf("PS:\n");
     printf("   - .huff extension is automatically added if not specified\n");
     printf("   - Maximum 255 files can be compressed at once\n");

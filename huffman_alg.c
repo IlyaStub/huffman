@@ -23,7 +23,12 @@ void compress(const char **in_filenames, const char *arch_name, int count)
 
     for (int i = 0; i < count; i++)
     {
-        const char *filename = in_filenames[i];
+        const char *path = in_filenames[i];
+
+        const char *filename = strrchr(path, '/');
+        filename = filename ? filename + 1 : path;
+
+    
 
         //записывем длину имени файла
         size_t name_len = strlen(filename);
@@ -37,7 +42,7 @@ void compress(const char **in_filenames, const char *arch_name, int count)
 
         //записываем размер файла
         struct stat file_size;
-        stat(filename, &file_size);
+        stat(path, &file_size);
         // printf("file size: %lu\n", file_size.st_size);
         for (int j = 7; j >= 0; j--)
         {
@@ -47,11 +52,15 @@ void compress(const char **in_filenames, const char *arch_name, int count)
 
     for (int i = 0; i < count; i++)
     {
-        const char *filename = in_filenames[i];
+        const char *path = in_filenames[i];
+
+        const char *filename = strrchr(path, '/');
+        filename = filename ? filename + 1 : path;
+
         printf("Compressing %s...\n", filename);
 
         size_t freq_table[ALF_SIZE] = {0};
-        buildFreqTable(filename, freq_table);
+        buildFreqTable(path, freq_table);
 
         // printf("freq table:\n");
         // for (int i = 0; i < ALF_SIZE; i++) {
@@ -80,7 +89,7 @@ void compress(const char **in_filenames, const char *arch_name, int count)
         // printf("Serialized Huffman Tree structure:\n");
         // debug_serialize_tree(tree);
         
-        file_reader *reader = newFileReader(filename, 4096);
+        file_reader *reader = newFileReader(path, 4096);
         if (!reader)
         {
             fprintf(stderr, "Error: cannot open file '%s' for reading\n", filename);
@@ -161,13 +170,6 @@ void decompress(const char *arch_name)
         }
 
         uint8_t name_len = reader->read_byte(reader);
-        if (name_len == 0 || name_len > 255)
-        {
-            fprintf(stderr, "Error: invalid file name length\n");
-            free(files);
-            freeFileReader(reader);
-            return;
-        }
         // printf("len_name: %d\n", name_len);
 
         for (int j = 0; j < name_len; j++)
