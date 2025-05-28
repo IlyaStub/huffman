@@ -1,4 +1,3 @@
-// huffman_builder.h
 #ifndef HUFFMAN_BUILDER_H
 #define HUFFMAN_BUILDER_H
 
@@ -20,5 +19,7 @@ tree_t* buildHuffmanTree(const size_t* freq_table);
 void genCodes(tree_t* root, huffman_code_t* table);
 void serTree(tree_t* root, file_writer* writer);
 tree_t* deserTree(file_reader* reader);
+
+// void debug_serialize_tree(tree_t* root);
 
 #endif

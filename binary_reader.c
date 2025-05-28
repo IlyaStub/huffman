@@ -5,7 +5,7 @@ static uint8_t read_byte(file_reader *self)
 {
     if (self->bit_pos != 8)
     {
-        for (; self->bit_pos < 8; self->bit_pos++)
+        while (self->bit_pos < 8)
         {
             self->read_bit(self);
         }
@@ -28,7 +28,7 @@ static uint8_t read_bit(file_reader *self)
 {
     if (self->bit_pos > 7)
     {
-        self->cur_byte = self->read_byte(self);
+        self->cur_byte = read_byte(self);
         self->bit_pos = 0;
     }
     return (self->cur_byte >> (7 - self->bit_pos++)) & 1;
@@ -54,8 +54,7 @@ file_reader *newFileReader(const char *file_name, size_t buffer_size)
     file_reader *self = calloc(1, sizeof(file_reader));
     if (self == NULL)
     {
-        free(self);
-        retuen NULL;
+        return NULL;
     }
 
     self->file = fopen(file_name, "rb");
@@ -76,8 +75,8 @@ file_reader *newFileReader(const char *file_name, size_t buffer_size)
         free(self);
         return NULL;
     }
-
-    self->buffer_pos = self->buffer_size;
+    self->buffer_size = buffer_size;
+    self->buffer_pos = buffer_size;
     self->bit_pos = 8;
     self->eof = 0;
 
@@ -96,9 +95,6 @@ void freeFileReader(file_reader *self)
         return;
     }
     fclose(self->file);
-    if (self->buffer != NULL)
-    {
-        free(self->buffer);
-    }
+    free(self->buffer);
     free(self);
 }

@@ -14,9 +14,9 @@ typedef struct BinaryWriter
 
     uint8_t cur_byte;
     uint8_t bit_pos;
-
-    uint8_t (*write_byte)(struct BinaryWriter *self, uint8_t byte);
-    uint8_t (*write_bit)(struct BinaryWriter *self, uint8_t bit);
+    
+    void (*write_byte)(struct BinaryWriter *self, uint8_t byte);
+    void (*write_bit)(struct BinaryWriter *self, uint8_t bit);
     void (*reset)(struct BinaryWriter *self);
 } file_writer;
 

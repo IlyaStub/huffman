@@ -12,7 +12,7 @@ typedef struct BinaryReader
     uint8_t *buffer;
     size_t buffer_size;
     size_t buffer_pos;
-
+    
     uint8_t cur_byte;
     uint8_t bit_pos;
     int eof;

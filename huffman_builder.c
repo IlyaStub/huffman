@@ -6,6 +6,7 @@
 void buildFreqTable(const char *filename, size_t *freq_table)
 {
     file_reader *reader = newFileReader(filename, 4096);
+    
     if (!reader)
     {
         fprintf(stderr, "Error: cannot open file '%s'\n", filename);
@@ -13,33 +14,35 @@ void buildFreqTable(const char *filename, size_t *freq_table)
     }
 
     for (int i = 0; i < ALF_SIZE; i++)
+    {
         freq_table[i] = 0;
+    }
 
-    size_t counter = 0;
+    size_t c = 0;
     while (!reader->eof)
     {
         uint8_t byte = reader->read_byte(reader);
         if (!reader->eof)
         {
             freq_table[byte]++;
-            counter++;
+            c++;
 
-            if (counter % 1000000 == 0)
+            if (c % 1000 == 0)
             {
                 float p = reader->progress(reader);
-                printf("\rReading: %.1f%%", p * 100);
+                printf("\rReading: %.0f%%", p * 100);
                 fflush(stdout);
             }
         }
     }
 
-    printf("\rReading: 100.0%%\n");
+    printf("\rReading: 100%%\n");
     freeFileReader(reader);
 }
 
 tree_t *buildHuffmanTree(const size_t *freq_table)
 {
-    queue_t *queue = createQueue(1000);
+    queue_t *queue = createQueue(ALF_SIZE);
     for (int i = 0; i < ALF_SIZE; i++)
     {
         if (freq_table[i] > 0)
@@ -65,7 +68,9 @@ tree_t *buildHuffmanTree(const size_t *freq_table)
 static void genCodRec(tree_t *node, huffman_code_t *table, uint64_t code, uint8_t deep)
 {
     if (!node)
+    {
         return;
+    }
 
     if (!node->leftNode && !node->rightNode)
     {
@@ -83,13 +88,28 @@ void genCodes(tree_t *root, huffman_code_t *table)
     for (int i = 0; i < ALF_SIZE; i++)
     {
         table[i].length = 0;
+        table[i].bits = 0;
     }
     genCodRec(root, table, 0, 0);
 }
 
+// void debug_serialize_tree(tree_t* root) {
+//     if (!root) return;
+
+//     if (!root->leftNode && !root->rightNode) {
+//         printf("1 '%c'\n", root->symbol); 
+//     } else {
+//         debug_serialize_tree(root->leftNode);
+//         debug_serialize_tree(root->rightNode);
+//         printf("0\n"); 
+//     }
+// }
+
+
 void serTree(tree_t *root, file_writer *writer)
 {
-    if (root == NULL) return;
+    if (root == NULL)
+        return;
 
     if (!root->leftNode && !root->rightNode)
     {
@@ -98,9 +118,9 @@ void serTree(tree_t *root, file_writer *writer)
     }
     else
     {
+        writer->write_bit(writer, 0);
         serTree(root->leftNode, writer);
         serTree(root->rightNode, writer);
-        writer->write_bit(writer, 0);
     }
 }
 
