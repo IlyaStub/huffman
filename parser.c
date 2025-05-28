@@ -158,6 +158,7 @@ void printHelp()
     printf("   - .huff extension is automatically added if not specified\n");
     printf("   - Maximum 255 files can be compressed at once\n");
     printf("   - Maximum filename length is 255 characters\n");
+    printf("   - You can enter the path to the file or just the name of the file if it is in the same directory.\n");
 }
 
 void printError(Parser *parser)
