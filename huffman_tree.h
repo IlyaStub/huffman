@@ -1,7 +1,8 @@
-#ifndef HUFFMAN_TREE
-#define HUFFMAN_TREE
+#ifndef HUFFMAN_TREE_H
+#define HUFFMAN_TREE_H
 
 #include <stddef.h>
+#include <stdio.h>
 
 typedef struct Huf_tree{
     struct Huf_tree* leftNode;
@@ -11,6 +12,8 @@ typedef struct Huf_tree{
 } tree_t;
 
 tree_t* newNode(tree_t* left, tree_t* right, size_t weight, unsigned char symbol);
+
+void print_tree(tree_t* root);
 
 void freeTree(tree_t* tree);
 
@@ -23,9 +26,9 @@ typedef struct PriorityQueue{
 
 queue_t* createQueue(size_t capacity);
 
-void enqueue(queue_t* queue, tree_t* node); // добавить элемент в очередь
+void enqueue(queue_t* queue, tree_t* node);
 
-tree_t* dequeue(queue_t* queue); // возвращает и удаляет min элемент 
+tree_t* dequeue(queue_t* queue);
 
 void freeQueue(queue_t* queue);
 
