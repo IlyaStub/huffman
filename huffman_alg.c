@@ -205,28 +205,34 @@ void decompress(const char *arch_name)
 
     for (int i = 0; i < count; i++)
     {
+        printf("Decompressing %s...\n", files[i].name);
+
+        file_writer *writer = newFileWriter(files[i].name, 4096);
+        if (!writer) {
+            fprintf(stderr, "Error: can not create file '%s'\n", files[i].name);
+            continue;
+        }
+        
+        if (files[i].size == 0)
+        {
+            writer->reset(writer);
+            freeFileWriter(writer);
+            printf("Finished %s (0 bytes)\n", files[i].name);
+            continue;
+        }
+
         tree_t *tree = deserTree(reader);
         //print_tree(tree);
-
         if (!tree)
         {
             fprintf(stderr, "Error: can not deserialize tree for file '%s'\n", files[i].name);
             continue;
         }
 
-        file_writer *writer = newFileWriter(files[i].name, 4096);
-        if (!writer) {
-            fprintf(stderr, "Error: can not create file '%s'\n", files[i].name);
-            freeTree(tree);
-            continue;
-        }
-
-        printf("Decompressing %s...\n", files[i].name);
         tree_t *curr = tree;
         size_t decoded = 0;
 
         // printf("bits: ");
-
         while (decoded < files[i].size && !reader->eof)
         {
             uint8_t bit = reader->read_bit(reader);
