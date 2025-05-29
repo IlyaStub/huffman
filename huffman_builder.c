@@ -126,11 +126,20 @@ void serTree(tree_t *root, file_writer *writer)
 
 static tree_t *deserTreeRec(file_reader *reader)
 {
-    uint8_t bit = reader->read_bit(reader);
 
+    if (reader->eof) {
+        return NULL;
+    }
+    uint8_t bit = reader->read_bit(reader);
+    if (reader->eof) {
+        return NULL;
+    }
     if (bit == 1)
     {
         uint8_t symbol = reader->read_byte(reader);
+        if (reader->eof) {
+            return NULL;
+        }
         return newNode(NULL, NULL, 0, symbol);
     }
     else

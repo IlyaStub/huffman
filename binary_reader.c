@@ -3,6 +3,7 @@
 
 static uint8_t read_byte(file_reader *self)
 {
+    if (!self || !self->file) return 0;
     if (self->bit_pos != 8)
     {
         while (self->bit_pos < 8)
@@ -12,6 +13,7 @@ static uint8_t read_byte(file_reader *self)
     }
     if (self->buffer_pos >= self->buffer_size)
     {
+        if (self->eof) return 0;
         size_t read = fread(self->buffer, 1, self->buffer_size, self->file);
         if (read == 0)
         {
@@ -26,9 +28,11 @@ static uint8_t read_byte(file_reader *self)
 
 static uint8_t read_bit(file_reader *self)
 {
+    if (!self || self->eof) return 0;
     if (self->bit_pos > 7)
     {
         self->cur_byte = read_byte(self);
+        if (self->eof) return 0;
         self->bit_pos = 0;
     }
     return (self->cur_byte >> (7 - self->bit_pos++)) & 1;
@@ -36,6 +40,8 @@ static uint8_t read_bit(file_reader *self)
 
 static void reset(file_reader *self)
 {
+    if (!self || !self->file) return;
+
     rewind(self->file); // перемещает указатель положения в файле на начало указанного потока
     self->buffer_pos = self->buffer_size;
     self->bit_pos = 8;
@@ -44,8 +50,8 @@ static void reset(file_reader *self)
 
 static float progress(file_reader *self)
 {
-    if (self->file_size == 0)
-        return 0;
+    if (!self || !self->file || self->file_size == 0) return 0;
+    if (self->file_size == 0) return 0;
     return (float)ftell(self->file) / self->file_size; // ftell - возвращает текущее значение указателя положения в файле для указанного потока
 }
 

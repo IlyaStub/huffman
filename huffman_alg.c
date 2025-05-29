@@ -28,8 +28,6 @@ void compress(const char **in_filenames, const char *arch_name, int count)
         const char *filename = strrchr(path, '/');
         filename = filename ? filename + 1 : path;
 
-    
-
         //записывем длину имени файла
         size_t name_len = strlen(filename);
         writer->write_byte(writer, (uint8_t)name_len);
@@ -150,6 +148,12 @@ void decompress(const char *arch_name)
 
     uint8_t count = reader->read_byte(reader);
     // printf("count files: %d\n", count);
+    if (reader->eof)
+    {
+        fprintf(stderr, "Error: missing file count\n");
+        freeFileReader(reader);
+        return;
+    }
 
     file_meta *files = malloc(sizeof(file_meta) * count);
     if (!files)
@@ -158,6 +162,8 @@ void decompress(const char *arch_name)
         freeFileReader(reader);
         return;
     }
+
+    memset(files, 0, sizeof(file_meta) * count);
 
     for (int i = 0; i < count; i++)
     {
@@ -185,7 +191,20 @@ void decompress(const char *arch_name)
             // printf(" %c", files[i].name[j]);
         }
         files[i].name[name_len] = '\0';
-        // printf("\n");
+        char *dot = strrchr(files[i].name, '.');
+        if (dot != NULL)
+        {
+            size_t ext_pos = dot - files[i].name;
+            memmove(files[i].name + ext_pos + 5, files[i].name + ext_pos, name_len - ext_pos + 1);
+            memcpy(files[i].name + ext_pos, "_copy", 5);
+            name_len += 5;
+        }
+        else
+        {
+            memcpy(files[i].name + name_len, "_copy", 5);
+            name_len += 5;
+            files[i].name[name_len] = '\0';
+        }
 
         size_t size = 0;
         for (int j = 0; j < 8; j++)
@@ -226,19 +245,32 @@ void decompress(const char *arch_name)
         if (!tree)
         {
             fprintf(stderr, "Error: can not deserialize tree for file '%s'\n", files[i].name);
+            freeFileWriter(writer);
+            remove(files[i].name);
             continue;
         }
 
         tree_t *curr = tree;
         size_t decoded = 0;
+        int e = 0;
 
         // printf("bits: ");
-        while (decoded < files[i].size && !reader->eof)
+        while (decoded < files[i].size && !reader->eof && !e)
         {
+            if(reader->eof){
+                e = 1;
+                break;
+            }
             uint8_t bit = reader->read_bit(reader);
             // printf("%d", bit);
             curr = bit ? curr->rightNode : curr->leftNode;
             
+            if (curr == NULL)
+            {
+                e = 1;
+                break;
+            }
+
             if (!curr->leftNode && !curr->rightNode)
             {
                 writer->write_byte(writer, curr->symbol);
@@ -248,10 +280,30 @@ void decompress(const char *arch_name)
         
         }
 
+        if (e)
+        {    
+            fprintf(stderr, "Error: something's wrong with the archive %s\n", files[i].name);
+            freeFileWriter(writer);
+            remove(files[i].name);
+            freeTree(tree);
+            continue;
+        }
+        else if (decoded < files[i].size)
+        {
+            fprintf(stderr, "Error: archive is corrupted (file %s is incomplete)\n", files[i].name);
+            freeFileWriter(writer);
+            remove(files[i].name);
+            freeTree(tree);
+            continue;
+        }
+        else
+        {
+            printf("Finished %s (%zu bytes)\n", files[i].name, files[i].size);
+        }
+
         writer->reset(writer);
         freeFileWriter(writer);
         freeTree(tree);
-        printf("Finished %s (%zu bytes)\n", files[i].name, files[i].size);
     }
 
     free(files);

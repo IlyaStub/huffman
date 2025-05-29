@@ -102,27 +102,27 @@ int parseArgs(Parser *parser)
         }
 
         for (int i = 0; i < parser->file_count; i++)
-    {
-        const char *filepath = parser->argv[3 + i];
-
-        struct stat st;
-        if (stat(filepath, &st) != 0)
         {
-            fprintf(stderr, "Error: The file %s does not exist\n", filepath);
-            return 0;
+            const char *filepath = parser->argv[3 + i];
+
+            struct stat st;
+            if (stat(filepath, &st) != 0)
+            {
+                fprintf(stderr, "Error: The file %s does not exist\n", filepath);
+                return 0;
+            }
+
+            const char *basename = strrchr(filepath, '/');
+            basename = basename ? basename + 1 : filepath;
+
+            if (strlen(basename) > 255)
+            {
+                fprintf(stderr, "Error: The filename '%s' is too long (max 255 chars).\n", basename);
+                return 0;
+            }
+
+            parser->input_files[i] = filepath;
         }
-
-        const char *basename = strrchr(filepath, '/');
-        basename = basename ? basename + 1 : filepath;
-
-        if (strlen(basename) > 255)
-        {
-            fprintf(stderr, "Error: The filename '%s' is too long (max 255 chars).\n", basename);
-            return 0;
-        }
-
-        parser->input_files[i] = filepath;
-    }
     }
     else if (parser->mode == DECOMPRESS)
     {
