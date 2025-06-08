@@ -56,7 +56,7 @@ int main(int argc, char **argv)
 
     clock_t e = clock();
     double time = (double)(e - s) / CLOCKS_PER_SEC;
-    printf("It's only been %.2f second(s). Very fast, rigth?\n", time);
+    printf("It's only been %.2f second(s). Very fast, right?\n", time);
 
     freeParser(parser);
     return result;

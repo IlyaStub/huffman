@@ -40,7 +40,7 @@ void freeParser(Parser *parser)
 
 void addExtension(char *name)
 {
-    if (strlen(name) > 5 || strcmp(name + strlen(name) - 5, ".huff") != 0)
+    if (strlen(name) <= 5 || strcmp(name + strlen(name) - 5, ".huff") != 0)
     {
         strcat(name, ".huff");
     }
