@@ -191,19 +191,26 @@ void decompress(const char *arch_name)
             // printf(" %c", files[i].name[j]);
         }
         files[i].name[name_len] = '\0';
-        char *dot = strrchr(files[i].name, '.');
-        if (dot != NULL)
+        
+        struct stat st;
+        int file_exists = (stat(files[i].name, &st) == 0);
+        
+        if (file_exists)
         {
-            size_t ext_pos = dot - files[i].name;
-            memmove(files[i].name + ext_pos + 5, files[i].name + ext_pos, name_len - ext_pos + 1);
-            memcpy(files[i].name + ext_pos, "_copy", 5);
-            name_len += 5;
-        }
-        else
-        {
-            memcpy(files[i].name + name_len, "_copy", 5);
-            name_len += 5;
-            files[i].name[name_len] = '\0';
+            char *dot = strrchr(files[i].name, '.');
+            if (dot != NULL)
+            {
+                size_t ext_pos = dot - files[i].name;
+                memmove(files[i].name + ext_pos + 5, files[i].name + ext_pos, name_len - ext_pos + 1);
+                memcpy(files[i].name + ext_pos, "_copy", 5);
+                name_len += 5;
+            }
+            else
+            {
+                memcpy(files[i].name + name_len, "_copy", 5);
+                name_len += 5;
+                files[i].name[name_len] = '\0';
+            }
         }
 
         size_t size = 0;
