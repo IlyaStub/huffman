@@ -1,9 +1,10 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "huffman_tree.h"
 
-// TREE
+// tree
 tree_t *newNode(tree_t *left, tree_t *right, size_t weight, unsigned char symbol)
 {
     tree_t *node = (tree_t *)malloc(sizeof(tree_t));
@@ -12,6 +13,30 @@ tree_t *newNode(tree_t *left, tree_t *right, size_t weight, unsigned char symbol
     node->weight = weight;
     node->symbol = symbol;
     return node;
+}
+
+static void print_huffman_tree(tree_t* tree, int level) {
+    if (tree == NULL) {
+        return;
+    }
+
+    for (int i = 0; i < level; i++) {
+        printf("  ");
+    }
+    
+    if (tree->leftNode == NULL && tree->rightNode == NULL) {
+        printf("'%c' (weight: %zu)\n", tree->symbol, tree->weight);
+    } else {
+        printf("Node (weight: %zu)\n", tree->weight);
+    }
+
+    print_huffman_tree(tree->leftNode, level + 1);
+    print_huffman_tree(tree->rightNode, level + 1);
+}
+
+void print_tree(tree_t* root) {
+    printf("Huffman Tree:\n");
+    print_huffman_tree(root, 0);
 }
 
 void freeTree(tree_t *tree)
@@ -33,7 +58,7 @@ static void swap(tree_t **first, tree_t **second)
 
 static void sift_up(queue_t *queue, int ind)
 {
-    while (ind > 0 && queue->data[ind]->weight > queue->data[(ind - 1) / 2]->weight)
+    while (ind > 0 && queue->data[ind]->weight < queue->data[(ind - 1) / 2]->weight)
     {
         swap(&queue->data[ind], &queue->data[(ind - 1) / 2]);
         ind = (ind - 1) / 2;
